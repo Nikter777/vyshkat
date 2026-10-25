@@ -8,10 +8,12 @@ type Container struct {
 }
 
 func NewContainer() *Container {
-	serviceCenter := service.DefaultServiceCenter{}
+	return NewContainerWithServiceCenter(service.DefaultServiceCenter{})
+}
 
+func NewContainerWithServiceCenter(center service.ServiceCenter) *Container {
 	return &Container{
-		ServiceCenter: serviceCenter,
-		Fleet:         service.NewFleet(serviceCenter),
+		ServiceCenter: center,
+		Fleet:         service.NewFleet(center),
 	}
 }

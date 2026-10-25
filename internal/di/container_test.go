@@ -48,3 +48,33 @@ func TestNewContainer(t *testing.T) {
 		)
 	}
 }
+
+type FakeServiceCenter struct {
+	Approved bool
+}
+
+func (f FakeServiceCenter) Inspect(transport domain.Transport) bool {
+	return f.Approved
+}
+
+func TestContainerWithFakeServiceCenter(t *testing.T) {
+	container := NewContainerWithServiceCenter(FakeServiceCenter{
+		Approved: false,
+	})
+
+	scooter := domain.Scooter{
+		ID:    "SC-001",
+		Model: "Ninebot",
+		Ease:  8,
+	}
+
+	err := container.Fleet.AddTransport(scooter)
+
+	if err == nil {
+		t.Fatal("expected transport to be rejected by fake service center")
+	}
+
+	if container.Fleet.TransportCount() != 0 {
+		t.Fatal("rejected transport must not enter the fleet")
+	}
+}
