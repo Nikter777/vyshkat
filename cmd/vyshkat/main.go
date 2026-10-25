@@ -2,12 +2,18 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"vyshkat/internal/di"
 	"vyshkat/internal/domain"
 )
 
 func main() {
+	run(os.Stdout)
+}
+
+func run(out io.Writer) {
 	container := di.NewContainer()
 	fleet := container.Fleet
 
@@ -26,16 +32,16 @@ func main() {
 		},
 	}
 
-	fmt.Println("=== Приём транспорта ===")
+	fmt.Fprintln(out, "=== Приём транспорта ===")
 
 	for _, transport := range transports {
 		err := fleet.AddTransport(transport)
 		if err != nil {
-			fmt.Printf("Отклонён: %s (%v)\n", transport.Name(), err)
+			fmt.Fprintf(out, "Отклонён: %s (%v)\n", transport.Name(), err)
 			continue
 		}
 
-		fmt.Printf("Принят: %s\n", transport.Name())
+		fmt.Fprintf(out, "Принят: %s\n", transport.Name())
 	}
 
 	fleet.AddItem(domain.Helmet{
@@ -46,20 +52,20 @@ func main() {
 		ID: "CH-001", Model: "Charging Station", Energy: 3.0,
 	})
 
-	fmt.Println("\n=== Отчёт по парку ===")
-	fmt.Printf("Транспорт: %d\n", fleet.TransportCount())
-	fmt.Printf("Вещи: %d\n", fleet.ItemCount())
-	fmt.Printf("Суммарное энергопотребление: %.2f кВт·ч/сутки\n", fleet.TotalEnergyConsumption())
+	fmt.Fprintln(out, "\n=== Отчёт по парку ===")
+	fmt.Fprintf(out, "Транспорт: %d\n", fleet.TransportCount())
+	fmt.Fprintf(out, "Вещи: %d\n", fleet.ItemCount())
+	fmt.Fprintf(out, "Суммарное энергопотребление: %.2f кВт·ч/сутки\n", fleet.TotalEnergyConsumption())
 
-	fmt.Println("\n=== Для новичков ===")
+	fmt.Fprintln(out, "\n=== Для новичков ===")
 
 	for _, transport := range fleet.BeginnerFriendly() {
-		fmt.Printf("%s (простота: %d)\n", transport.Name(), transport.EaseOfUse())
+		fmt.Fprintf(out, "%s (простота: %d)\n", transport.Name(), transport.EaseOfUse())
 	}
 
-	fmt.Println("\n=== Инвентаризация ===")
+	fmt.Fprintln(out, "\n=== Инвентаризация ===")
 
 	for _, item := range fleet.Inventory() {
-		fmt.Printf("%s — %s\n", item.InventoryNumber(), item.Name())
+		fmt.Fprintf(out, "%s — %s\n", item.InventoryNumber(), item.Name())
 	}
 }
